@@ -414,6 +414,12 @@ class FeMesh(_stgermain.StgCompoundComponent, function.FunctionInput):
             self._specialSets = _SpecialSetsDict(self)
 
         return self._specialSets
+    
+    def _add_specialSet(self, nodeIds, name):
+        self.specialSets[name] = uw.mesh.FeMesh_IndexSet(object = self,
+                                                         topologicalIndex = 0,
+                                                         size = self.nodesGlobal,
+                                                         fromObject = nodeIds)
 
     def _add_to_stg_dict(self,componentDictionary):
         # call parents method
@@ -429,7 +435,7 @@ class FeMesh(_stgermain.StgCompoundComponent, function.FunctionInput):
         iset.addAll()
         return iset._get_iterator()
 
-    def save( self, filename ):
+    def save( self, filename, scaling=None, units=None):
         """
         Save the mesh to disk
 
@@ -508,7 +514,13 @@ class FeMesh(_stgermain.StgCompoundComponent, function.FunctionInput):
 
         local = self.nodesLocal
         # write to the dset using the global node ids
-        dset[self.data_nodegId[0:local],:] = self.data[0:local]
+        if scaling:
+            from unsupported.scaling import Dimensionalize
+            vals = Dimensionalize(self.data[0:local], scaling, units)
+        else:
+            vals = self.data[0:local]
+
+        dset[self.data_nodegId[0:local],:] = vals
 
         # write the element node connectivity
         self.data_elementNodes
@@ -584,6 +596,7 @@ class FeMesh(_stgermain.StgCompoundComponent, function.FunctionInput):
 
         with self.deform_mesh():
             self.data[0:self.nodesLocal] = dset[self.data_nodegId[0:self.nodesLocal],:]
+
 
         # note that deform_mesh always sets the mesh to irregular.
         # reset this according to what the saved file has.
@@ -1164,6 +1177,9 @@ class FeMesh_IndexSet(uw.container.ObjectifiedIndexSet, function.FunctionInput):
                            "Ie, remove the '()'.")
     def _get_iterator(self):
         return libUnderworld.Function.MeshIndexSet(self._cself, self.object._cself)
+
+    def __radd__(self, other):
+        return self + other
 
 class _FeMesh_Regional(FeMesh_Cartesian):
     """

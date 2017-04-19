@@ -346,7 +346,8 @@ class StokesSolver(_stgermain.StgCompoundComponent):
             self._setup_mg()
 
         # check for non-linearity
-        nonLinear=self._check_linearity(nonLinearIterate)
+        #nonLinear=self._check_linearity(nonLinearIterate)
+        nonLinear = False
 
         if nonLinear and nonLinearIterate:
             # self._stokesSLE._cself.nonLinearTolerance = nonLinearTolerance # set via python

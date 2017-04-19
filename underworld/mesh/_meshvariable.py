@@ -323,7 +323,7 @@ class MeshVariable(_stgermain.StgCompoundComponent,uw.function.Function,_stgerma
             xdmfFH.write(string)
             xdmfFH.close()
 
-    def save( self, filename, meshHandle=None ):
+    def save( self, filename, meshHandle=None, scaling=None, units=None):
         """
         Save the MeshVariable to disk.
 
@@ -394,7 +394,14 @@ class MeshVariable(_stgermain.StgCompoundComponent,uw.function.Function,_stgerma
 
         # write to the dset using the global node ids
         local = mesh.nodesLocal
-        dset[mesh.data_nodegId[0:local],:] = self.data[0:local]
+
+        if scaling:
+            from unsupported.scaling import Dimensionalize
+            vals = Dimensionalize(self.data[0:local], scaling, units)
+        else:
+            vals = self.data[0:local]
+
+        dset[mesh.data_nodegId[0:local],:] = vals
 
         # save a hdf5 attribute to the elementType used for this field - maybe useful
         h5f.attrs["elementType"] = np.string_(mesh.elementType)

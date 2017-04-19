@@ -219,7 +219,7 @@ class Swarm(_swarmabstract.SwarmAbstract, function.FunctionInput, _stgermain.Sav
         """
         return libUnderworld.Function.SwarmInput(self._particleCoordinates._cself)
 
-    def save(self, filename):
+    def save(self, filename, scaling=None, units=None):
         """
         Save the swarm to disk.
 
@@ -273,7 +273,7 @@ class Swarm(_swarmabstract.SwarmAbstract, function.FunctionInput, _stgermain.Sav
             raise TypeError("Expected filename to be provided as a string")
 
         # just save the particle coordinates SwarmVariable
-        self.particleCoordinates.save(filename)
+        self.particleCoordinates.save(filename, scaling=scaling, units=units)
 
         return uw.utils.SavedFileData( self, filename )
 

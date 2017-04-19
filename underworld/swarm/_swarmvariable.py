@@ -313,7 +313,7 @@ class SwarmVariable(_stgermain.StgClass, function.Function):
         h5f.close();
 
 
-    def save( self, filename, swarmFilepath=None ):
+    def save( self, filename, scaling=None, units=None, swarmFilepath=None):
         """
         Save the swarm variable to disk.
 
@@ -406,7 +406,13 @@ class SwarmVariable(_stgermain.StgClass, function.Function):
                                    dtype=self.data.dtype)
 
         if swarm.particleLocalCount > 0: # only add if there are local particles
-            dset[offset:offset+swarm.particleLocalCount] = self.data[:]
+            if scaling:
+                from unsupported.scaling import Dimensionalize
+                vals = Dimensionalize(self.data[:], scaling, units)
+            else:
+                vals = self.data[:]
+
+            dset[offset:offset+swarm.particleLocalCount] = vals
 
         # link to the swarm file if it's provided
         if swarmFilepath and uw.rank()==0:
