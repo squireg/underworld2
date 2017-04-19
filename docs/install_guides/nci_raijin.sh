@@ -1,6 +1,6 @@
 # This script builds underworld2 on the nci_raijin machine.
 
-git clone http://github.com/underworldcode/underworld2.git your_uw_directory
+git clone https://github.com/underworldcode/underworld2.git your_uw_directory
 cd your_uw_directory
 
 module purge
@@ -15,6 +15,8 @@ export HDF5_VERSION=1.8.14
 export PETSC_DIR=/projects/m18/opt/petsc-3.6.3
 export PYTHONPATH=/projects/m18/opt:$PYTHONPATH
 export PATH=/projects/m18/opt/swig-3.0.10/bin:$PATH
+
+cd libUnderworld
 
 ./configure.py --python-dir=$PYTHON_ROOT --with-debugging=0 --with-graphics=0
 ./compile.py
