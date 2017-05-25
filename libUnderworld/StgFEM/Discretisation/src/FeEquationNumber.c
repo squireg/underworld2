@@ -1285,15 +1285,24 @@ int GenerateEquationNumbering(
 	VecCreate( PETSC_COMM_WORLD, &offset_list );
 	VecSetSizes( offset_list, PETSC_DECIDE, (size+1) );
 	VecSetFromOptions( offset_list );
-	for( i=rank; i<size; i++ ) {
-		VecSetValue( offset_list, i+1, eq_cnt, ADD_VALUES );
-	}
-	VecAssemblyBegin(offset_list);
-	VecAssemblyEnd(offset_list);
-	/*
-	PetscPrintf(PETSC_COMM_WORLD, "offset_list \n");
-	VecView( offset_list, PETSC_VIEWER_STDOUT_WORLD );
-	*/
+    VecSet(offset_list,0);
+    
+    PetscInt entries = size-rank;
+    PetscInt* vec_location = malloc( sizeof(PetscInt)*entries );
+    PetscScalar* eq_cnts = malloc( sizeof(PetscScalar)*entries );
+    memset(eq_cnts,0,sizeof(PetscScalar)*entries);
+    for( i=rank; i<size; i++ ) {
+        vec_location[i-rank] = (PetscInt) i+1;
+        eq_cnts[i-rank] += (PetscScalar) eq_cnt;
+    }
+    VecSetValues( offset_list, entries, vec_location, eq_cnts, ADD_VALUES );
+    VecAssemblyBegin(offset_list);
+    VecAssemblyEnd(offset_list);
+    free(vec_location);
+    free(eq_cnts);
+
+//	PetscPrintf(PETSC_COMM_WORLD, "offset_list \n");
+//	VecView( offset_list, PETSC_VIEWER_STDOUT_WORLD );
 
 	VecScatterCreateToAll(offset_list,&vscat_offset,&seq_offset_list);
 	_VecScatterBeginEnd( vscat_offset, offset_list, seq_offset_list, INSERT_VALUES, SCATTER_FORWARD );
@@ -1309,7 +1318,7 @@ int GenerateEquationNumbering(
 	Stg_VecDestroy(&offset_list);
 	Stg_VecDestroy(&seq_offset_list);
 
-	/* PetscPrintf( PETSC_COMM_SELF, "[%d]: offset = %d \n", rank, offset ); */
+//	 PetscPrintf( PETSC_COMM_SELF, "[%d]: offset = %d \n", rank, offset ); 
 
 
 	VecGetArray( local_eqnum, &_local_eqnum );
