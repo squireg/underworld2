@@ -19,10 +19,10 @@ ENV LANGUAGE en_US.UTF-8
 # # Setup work directory for backward-compatibility
 # RUN mkdir /home/$NB_USER/work
 
+USER root
+
 # Fix permissions in home directory, just in case
 RUN chown -R $NB_USER.users $HOME/.jupyter
-
-USER root
 
 # Install jupyterhub dependencies, including python3
 RUN apt-get update -qq && \
