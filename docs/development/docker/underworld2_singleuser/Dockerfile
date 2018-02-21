@@ -1,39 +1,41 @@
-FROM lmoresi/uw2-jupyter-hub-tested:latest
+#FROM lmoresi/uw2-jupyter-hub-tested:latest
 #FROM underworldcode/underworld2:latest
+FROM rbeucher/underworld2_geodynamics:latest
 MAINTAINER MAINTAINER https://github.com/underworldcode/
 
 # Configure environment for singleuser
 ENV SHELL /bin/bash
-ENV NB_USER jovyan
 ENV NB_UID 1000
 ENV HOME /home/$NB_USER
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-# Create jovyan user with UID=1000 and in the 'users' group
-RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
+# # Create jovyan user with UID=1000 and in the 'users' group
+# RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
 
-USER $NB_USER
+# USER $NB_USER
 
-# Setup work directory for backward-compatibility
-RUN mkdir /home/$NB_USER/work
+# # Setup work directory for backward-compatibility
+# RUN mkdir /home/$NB_USER/work
 
 USER root
 
 # Install jupyterhub dependencies, including python3
 RUN apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
-        npm \
-        nodejs-legacy \
         python3 \
         python3-pip \
-        python3-dev
+        python3-dev \
+        python3-setuptools
+RUN pip3 install wheel
 RUN pip3 install \
-        'jupyterhub==0.8.1' \
-        jupyterlab \
-        ipyparallel
-RUN npm install -g configurable-http-proxy
+    'jupyterhub==0.8.1' \
+    jupyterlab \
+    ipyparallel
+# npm \
+# nodejs-legacy \
+# RUN npm install -g configurable-http-proxy
 
 # Install Python 2 kernel spec globally to avoid permission problems when NB_UID
 # switching at runtime and to allow the notebook server running out of the root
@@ -41,9 +43,10 @@ RUN npm install -g configurable-http-proxy
 # launch.
 RUN python -m ipykernel install
 
-# Setup ipyparallel for mpi profile for the NBUSER?
 USER $NB_USER
 WORKDIR $HOME
+
+# Setup ipyparallel for mpi profile for the NBUSER?
 RUN ipython2 profile create --parallel --profile=mpi && \
     echo "c.IPClusterEngines.engine_launcher_class = 'MPIEngineSetLauncher'" >> $HOME/.ipython/profile_mpi/ipcluster_config.py
 
