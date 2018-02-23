@@ -25,6 +25,9 @@ then
           sed -i -- "s/\\(href\\|src\\)=\"\\/\\(tree\\|files\\|terminals\\|edit\\)\\([^\"]*\\)\"/\\1=\"${JUPYTERHUB_SERVICE_PREFIX//\//\\\/}\\2\\3\"/g" "${NOTEBOOK_DIR}"/**/*.html
         )
 
+        # Trust all the notebooks in the user's home directory after the copy
+        find "${NOTEBOOK_DIR}/" -name \*.ipynb -print0 | xargs -0 jupyter trust
+
     else
         echo Unable to copy notebooks from workspace
         echo "${NOTEBOOK_DIR}" is not a directory!
