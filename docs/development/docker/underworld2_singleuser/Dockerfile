@@ -11,14 +11,6 @@ ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 
-# # Create jovyan user with UID=1000 and in the 'users' group
-# RUN useradd -m -s /bin/bash -N -u $NB_UID $NB_USER
-
-# USER $NB_USER
-
-# # Setup work directory for backward-compatibility
-# RUN mkdir /home/$NB_USER/work
-
 USER root
 
 # Fix permissions in home directory, just in case
@@ -36,9 +28,6 @@ RUN pip3 install \
     'jupyterhub==0.8.1' \
     jupyterlab \
     ipyparallel
-# npm \
-# nodejs-legacy \
-# RUN npm install -g configurable-http-proxy
 
 # Install Python 2 kernel spec globally to avoid permission problems when NB_UID
 # switching at runtime and to allow the notebook server running out of the root
@@ -61,6 +50,10 @@ USER root
 # Copy contents of home directory into /workspace so it'll be copied into the
 # user's persistent home directory the first time they start their server.
 RUN rsync -au "$HOME"/.ipython "$HOME"/.jupyter /workspace/
+
+# environment variable will internally run xvfb when glucifer is imported,
+#see /opt/underworld2/glucifer/__init__.py
+ENV GLUCIFER_USE_XVFB 1
 
 # Reinstate the xvfb entrypoint, required for underworld viz, and use the
 # customised start command to set up the underworld notebooks in the jupyterhub

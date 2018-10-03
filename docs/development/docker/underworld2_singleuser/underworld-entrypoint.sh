@@ -34,8 +34,4 @@ then
     fi
 fi
 
-# No longer required, since glucifer can invoke xvfb directly
-# # Wrap the provided command with xvfb-run so we can do viz
-# rm -f /tmp/.X99-lock && xvfb-run -s '-screen 0 1600x1200x16' $@
-
 $@
